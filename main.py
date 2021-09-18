@@ -3,7 +3,13 @@ import sys
 
 
 
-conn = db.connect("dbname=almacenroyal user=arturo")
+conn = db.connect(
+    database = 'd4i0d59nudi76s',
+    user = 'lhxbvkydfkbtip',
+    password = 'bd17774e8cc4b1967a0b458d4a47222b2821572fc08a104906a4fac10748141c',
+    host = 'ec2-54-147-93-73.compute-1.amazonaws.com',
+    port = '5432'
+)
 conn.autocommit = True
 cur = conn.cursor()
 sg.ChangeLookAndFeel('LightGreen6')
