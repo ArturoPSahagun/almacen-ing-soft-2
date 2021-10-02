@@ -1,4 +1,5 @@
 from clases import *
+from submenus import *
 import sys
 
 
@@ -15,6 +16,8 @@ cur = conn.cursor()
 sg.ChangeLookAndFeel('LightGreen6')
 
 user = ''
+rol = ''
+nombre = ''
 treedata = sg.TreeData()
 
 
@@ -29,7 +32,7 @@ window = sg.Window('Sistema de Almacen', layout_login)
 while True:
     event, values = window.read()
     if event == "Login" :
-        cur.execute('select password from usuario where username = \'' + values['-NAMEINPUT-'] + '\'')
+        cur.execute('select password, nombre, rol from usuario where username = \'' + values['-NAMEINPUT-'] + '\'')
         query = cur.fetchall()
         passw = ' '
         if len(query) > 0:
@@ -41,6 +44,8 @@ while True:
             continue
         else:
             user = values['-NAMEINPUT-']
+            nombre = query[0][1]
+            rol = query[0][2]
             window.close()
             break
         window.close()
@@ -73,10 +78,21 @@ button_layout = [[sg.Button('Entradas', size=(10, 3))],
                  [sg.Button('Conteo', size=(10, 3))],
                  [sg.Button('Salir', size=(10, 3))]]
 
-layout_main =   [[sg.Text("Bienvenido, " + user)],
-                 [sg.Frame('Consultas', consult_layout), sg.Column(button_layout)]
+menu_layout = [
+                ['Usuarios',
+                    ['Crear usuario', 'Editar Usuario']
+                ]
+              ]
+
+layout_main =   [[sg.Menu(menu_layout, key = '-MENU-')],
+                 [sg.Text("Bienvenido, " + nombre)],
+                 [sg.Frame('Consultas', consult_layout), sg.Column(button_layout, key = '-BOTONERA-')]
                 ]
 window = sg.Window("Sistema de almacen", layout_main, finalize=True)
+if rol != 'admin':
+    window['-MENU-'].update(visible=False)
+    if rol != 'operador':
+        window['-BOTONERA-'].update(visible=False)
 cur.execute('SELECT DISTINCT depto FROM producto')
 dptos = cur.fetchall()
 dptos = [i for sub in dptos for i in sub]
@@ -175,6 +191,12 @@ while True:
     elif event == 'Conteo':
         fc = Feature_conteo(conn, user)
         fc.ejecutar()
+    elif event == 'Crear usuario':
+        fnewu = crear_usuarios(conn)
+        fnewu.ejecutar()
+    elif event == 'Editar Usuario':
+        feditu = editar_usuarios(conn)
+        feditu.ejecutar()
     elif event == 'Salir':
         break
     if event == sg.WIN_CLOSED:
