@@ -79,4 +79,63 @@ class editar_usuarios:
         cur.close()
         window.close()
 
+class editar_productos:
+    layout = [[]]
+    def __init__(self, conn):
+        self.conn = conn
+        self.layout=[[sg.Text("Ingrese codigo del producto a editar: "), sg.Input(size=(10, 1), key='-CODIGOINPUT-'), sg.Button('Buscar')],
+                     [sg.Text("Departamento:\t "), sg.Input(size=(20, 1), key='-DPTOINPUT-')],
+                     [sg.Text("Nombre:\t "), sg.Input(size=(20, 1), key='-NOMBREINPUT-')],
+                     [sg.Text("Marca:\t "), sg.Input(size=(20, 1), key='-MARCAINPUT-')],
+                     [sg.Text("Tamaño:\t "), sg.Input(size=(20, 1), key='-SIZEINPUT-')],
+                     [sg.Text("Color:\t "), sg.Input(size=(20, 1), key='-COLORINPUT-')],
+                     [sg.Text("Precio:\t "), sg.Input(size=(20, 1), key='-PRECIOINPUT-')],
+                     [sg.Text("Ubicacion:\t "), sg.Input(size=(20, 1), key='-UBICACIONINPUT-')],
+                     [sg.Text("Disponible:\t "), sg.Combo(('t', 'f'), key='-DISPONIBLEINPUT-')],
+                     [sg.Button('Actualizar')]
+                     ]
 
+    def ejecutar(self):
+        cur = self.conn.cursor()
+        window = sg.Window('Editar Productos',self.layout)
+        while True:
+            event, values = window.read()
+            if event == 'Buscar':
+                cur.execute('select * from producto where sku = %s', (values['-CODIGOINPUT-'],))
+                prod = cur.fetchall()
+                if len(prod) > 0:
+                    window['-DPTOINPUT-'].update(prod[0][7])
+                    window['-NOMBREINPUT-'].update(prod[0][2])
+                    window['-MARCAINPUT-'].update(prod[0][3])
+                    window['-SIZEINPUT-'].update(prod[0][4])
+                    window['-COLORINPUT-'].update(prod[0][5])
+                    window['-PRECIOINPUT-'].update(prod[0][6])
+                    window['-UBICACIONINPUT-'].update(prod[0][1])
+                    window['-DISPONIBLEINPUT-'].update(prod[0][9])
+
+            elif event == 'Actualizar':
+                cur.execute('UPDATE producto '
+                            'SET depto = %s, '
+                            'nombre = %s, '
+                            'marca = %s,'
+                            'size = %s,'
+                            'color = %s,'
+                            'precio = %s,'
+                            'ubicacion = %s,'
+                            'disponible = %s'
+                            'WHERE sku = %s',
+                            (values['-DPTOINPUT-'],
+                             values['-NOMBREINPUT-'],
+                             values['-MARCAINPUT-'],
+                             values['-SIZEINPUT-'],
+                             values['-COLORINPUT-'],
+                             values['-PRECIOINPUT-'],
+                             values['-UBICACIONINPUT-'],
+                             values['-DISPONIBLEINPUT-'],
+                             values['-CODIGOINPUT-'],))
+                break
+
+            if event == sg.WIN_CLOSED:
+                break
+        cur.close()
+        window.close()

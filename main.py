@@ -81,6 +81,9 @@ button_layout = [[sg.Button('Entradas', size=(10, 3))],
 menu_layout = [
                 ['Usuarios',
                     ['Crear usuario', 'Editar Usuario']
+                ],
+                ['Productos',
+                 ['Editar Producto']
                 ]
               ]
 
@@ -164,27 +167,9 @@ while True:
     elif event == 'Mostrar Productos':
         mp = Muestra(conn, 'producto')
         mp.ejecutar_producto()
-    elif event == 'Mostrar Usuarios':
-        mu = Muestra(conn, 'usuario')
-        mu.ejecutar_usuario()
-    elif event == 'Mostrar Entradas':
-        me = muestra_es(conn, 'entrada')
-        me.ejecutar_entrada()
-    elif event == 'Mostrar Salidas':
-        ms = muestra_es(conn, 'salida')
-        ms.ejecutar_salida()
     elif event == 'Editar Productos':
         ep = editar_productos(conn)
         ep.ejecutar()
-    elif event == 'Editar Usuarios':
-        eu = editar_usuarios(conn)
-        eu.ejecutar()
-    elif event == 'Crear Usuarios':
-        cu = crear_usuarios(conn)
-        cu.ejecutar()
-    elif event == 'Eliminar Usuarios':
-        du = eliminar_usuarios(conn)
-        du.ejecutar()
     elif event == 'Bajas':
         fb = Feature_Baja(conn)
         fb.ejecutar()
@@ -197,6 +182,9 @@ while True:
     elif event == 'Editar Usuario':
         feditu = editar_usuarios(conn)
         feditu.ejecutar()
+    elif event == 'Editar Producto':
+        feditp = editar_productos(conn)
+        feditp.ejecutar()
     elif event == 'Salir':
         break
     if event == sg.WIN_CLOSED:
