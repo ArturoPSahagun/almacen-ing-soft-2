@@ -92,6 +92,7 @@ class editar_productos:
                      [sg.Text("Precio:\t "), sg.Input(size=(20, 1), key='-PRECIOINPUT-')],
                      [sg.Text("Ubicacion:\t "), sg.Input(size=(20, 1), key='-UBICACIONINPUT-')],
                      [sg.Text("Disponible:\t "), sg.Combo(('t', 'f'), key='-DISPONIBLEINPUT-')],
+                     [sg.Text("Minima Existencia:\t"), sg.Input(size=(20, 1), key='-MINEXISTENCIAINPUT-')],
                      [sg.Button('Actualizar')]
                      ]
 
@@ -112,6 +113,7 @@ class editar_productos:
                     window['-PRECIOINPUT-'].update(prod[0][6])
                     window['-UBICACIONINPUT-'].update(prod[0][1])
                     window['-DISPONIBLEINPUT-'].update(prod[0][9])
+                    window['-MINEXISTENCIAINPUT-'].update(prod[0][10])
 
             elif event == 'Actualizar':
                 cur.execute('UPDATE producto '
@@ -122,7 +124,8 @@ class editar_productos:
                             'color = %s,'
                             'precio = %s,'
                             'ubicacion = %s,'
-                            'disponible = %s'
+                            'disponible = %s,'
+                            'minexistencia = %s'
                             'WHERE sku = %s',
                             (values['-DPTOINPUT-'],
                              values['-NOMBREINPUT-'],
@@ -132,6 +135,7 @@ class editar_productos:
                              values['-PRECIOINPUT-'],
                              values['-UBICACIONINPUT-'],
                              values['-DISPONIBLEINPUT-'],
+                             values['-MINEXISTENCIAINPUT-'],
                              values['-CODIGOINPUT-'],))
                 break
 

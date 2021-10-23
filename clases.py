@@ -147,6 +147,7 @@ class Feature_alta:
                        [sg.Text("Color:\t\t"), sg.Input(size=(20, 1), enable_events=True, key='-COLORINPUT-')],
                        [sg.Text("Precio:\t\t"), sg.Input(size=(20, 1), enable_events=True, key='-PRECIOINPUT-')],
                        [sg.Text("Ubicacion:\t"), sg.Input(size=(20, 1), enable_events=True, key='-UBICACIONINPUT-')],
+                       [sg.Text("Minima Existencia:\t"), sg.Input(size=(20, 1), enable_events=True, key='-MINEXISTENCIAINPUT-')],
                        [sg.Button('Registrar producto nuevo')]]
 
 
@@ -156,10 +157,10 @@ class Feature_alta:
         while True:
             event, values = window.read()
             if event == 'Registrar producto nuevo':
-                cur.execute('insert into producto (sku, depto, nombre, marca, size, color, precio, ubicacion, existencias)'
-                            'values(%s, %s, %s, %s, %s, %s, %s, %s, 0);',
+                cur.execute('insert into producto (sku, depto, nombre, marca, size, color, precio, ubicacion, minexistencia, existencias)'
+                            'values(%s, %s, %s, %s, %s, %s, %s, %s, %s, 0);',
                             (values['-CODIGOINPUT-'],values['-DPTOINPUT-'],values['-NOMBREINPUT-'],values['-MARCAINPUT-'],values['-SIZEINPUT-'],
-                             values['-COLORINPUT-'],values['-PRECIOINPUT-'],values['-UBICACIONINPUT-']))
+                             values['-COLORINPUT-'],values['-PRECIOINPUT-'],values['-UBICACIONINPUT-'],values['-MINEXISTENCIAINPUT-']))
                 self.conn.commit()
                 sg.popup("Éxito", "El producto " + values['-NOMBREINPUT-'] + " se ha registrado correctamente.")
                 break
