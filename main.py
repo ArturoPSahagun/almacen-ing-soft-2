@@ -124,15 +124,12 @@ updateFields(cur, window)
 while True:
     event, values = window.read()
     if event == 'Entradas':
-        fe = Feature_entrada(conn, user)
-        fe.ejecutar()
+        Feature_entrada(conn, user).ejecutar()
     elif event == "Altas":
-        fa = Feature_alta(conn, user)
-        fa.ejecutar()
+        Feature_alta(conn, user).ejecutar()
         updateFields(cur, window)
     elif event == "Salidas":
-        fs = Feature_salida(conn, user)
-        fs.ejecutar()
+        Feature_salida(conn, user).ejecutar()
     elif event == 'Buscar' :
         cur.execute('SELECT sku, nombre, depto, marca, size, color, precio, existencias, ubicacion '
                    'from producto where disponible = True '
@@ -153,7 +150,6 @@ while True:
             treedata.insert('', prod[0], prod[0], values=[prod[1], prod[2], prod[3], prod[4], prod[5], prod[6], prod[7], prod[8]])
         window['-LISTA-'].update(treedata)
         treedata = sg.TreeData()
-
     elif event == 'Editar Productos':
         editar_productos(conn).ejecutar()
     elif event == 'Bajas':
