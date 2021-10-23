@@ -2,8 +2,29 @@ from clases import *
 from submenus import *
 import sys
 
+def updateFields(cur, window):
+    cur.execute('SELECT DISTINCT depto FROM producto')
+    dptos = cur.fetchall()
+    dptos = [i for sub in dptos for i in sub]
+    dptos.insert(0, '')
+    window['-DPTOINPUT-'].update(values=(dptos))
+    cur.execute('SELECT DISTINCT marca FROM producto')
+    marcas = cur.fetchall()
+    marcas = [i for sub in marcas for i in sub]
+    marcas.insert(0, '')
+    window['-MARCAINPUT-'].update(values=(marcas))
+    cur.execute('SELECT DISTINCT size FROM producto')
+    sizes = cur.fetchall()
+    sizes = [i for sub in sizes for i in sub]
+    sizes.insert(0, '')
+    window['-SIZEINPUT-'].update(values=(sizes))
+    cur.execute('SELECT DISTINCT color FROM producto')
+    colores = cur.fetchall()
+    colores = [i for sub in colores for i in sub]
+    colores.insert(0, '')
+    window['-COLORINPUT-'].update(values=(colores))
 
-
+#Conexion a la database
 conn = db.connect(
     database = 'd4i0d59nudi76s',
     user = 'lhxbvkydfkbtip',
@@ -56,10 +77,10 @@ while True:
 
 consult_layout = [[sg.Text("Codigo:"), sg.Input(size=(5, 1), enable_events=True, key='-CODIGOINPUT-'),
                    sg.Text("Nombre:"), sg.Input(size=(10,1),enable_events=True, key='-NAMEINPUT-'),
-                   sg.Text('Departamento:'), sg.Combo((), enable_events=True, key='-DPTOINPUT-')],
-                  [sg.Text('Marca:'), sg.Combo((), enable_events=True, key='-MARCAINPUT-'),
-                   sg.Text('Tamaño:'), sg.Combo((), enable_events=True, key='-SIZEINPUT-'),
-                   sg.Text('Color:'), sg.Combo((), enable_events=True, key='-COLORINPUT-'),
+                   sg.Text('Departamento:'), sg.Combo((), enable_events=True, key='-DPTOINPUT-', size=(10,1))],
+                  [sg.Text('Marca:'), sg.Combo((), enable_events=True, key='-MARCAINPUT-', size=(10,1)),
+                   sg.Text('Tamaño:'), sg.Combo((), enable_events=True, key='-SIZEINPUT-', size=(5,1)),
+                   sg.Text('Color:'), sg.Combo((), enable_events=True, key='-COLORINPUT-', size=(10,1)),
                    sg.Button('Buscar')],
                   [sg.Tree(data=treedata,
                            text_color='black',
@@ -96,23 +117,8 @@ if rol != 'admin':
     window['-MENU-'].update(visible=False)
     if rol != 'operador':
         window['-BOTONERA-'].update(visible=False)
-cur.execute('SELECT DISTINCT depto FROM producto')
-dptos = cur.fetchall()
-dptos = [i for sub in dptos for i in sub]
-dptos.append('')
-window['-DPTOINPUT-'].update(values=(dptos))
-cur.execute('SELECT DISTINCT marca FROM producto')
-marcas = cur.fetchall()
-marcas = [i for sub in marcas for i in sub]
-window['-MARCAINPUT-'].update(values=(marcas))
-cur.execute('SELECT DISTINCT size FROM producto')
-sizes = cur.fetchall()
-sizes = [i for sub in sizes for i in sub]
-window['-SIZEINPUT-'].update(values=(sizes))
-cur.execute('SELECT DISTINCT color FROM producto')
-colores = cur.fetchall()
-colores = [i for sub in colores for i in sub]
-window['-COLORINPUT-'].update(values=(colores))
+
+updateFields(cur, window)
 
 #bucle principal
 while True:
@@ -123,23 +129,7 @@ while True:
     elif event == "Altas":
         fa = Feature_alta(conn, user)
         fa.ejecutar()
-        cur.execute('SELECT DISTINCT depto FROM producto')
-        dptos = cur.fetchall()
-        dptos = [i for sub in dptos for i in sub]
-        dptos.append('')
-        window['-DPTOINPUT-'].update(values=(dptos))
-        cur.execute('SELECT DISTINCT marca FROM producto')
-        marcas = cur.fetchall()
-        marcas = [i for sub in marcas for i in sub]
-        window['-MARCAINPUT-'].update(values=(marcas))
-        cur.execute('SELECT DISTINCT size FROM producto')
-        sizes = cur.fetchall()
-        sizes = [i for sub in sizes for i in sub]
-        window['-SIZEINPUT-'].update(values=(sizes))
-        cur.execute('SELECT DISTINCT color FROM producto')
-        colores = cur.fetchall()
-        colores = [i for sub in colores for i in sub]
-        window['-COLORINPUT-'].update(values=(colores))
+        updateFields(cur, window)
     elif event == "Salidas":
         fs = Feature_salida(conn, user)
         fs.ejecutar()
@@ -164,27 +154,18 @@ while True:
         window['-LISTA-'].update(treedata)
         treedata = sg.TreeData()
 
-    elif event == 'Mostrar Productos':
-        mp = Muestra(conn, 'producto')
-        mp.ejecutar_producto()
     elif event == 'Editar Productos':
-        ep = editar_productos(conn)
-        ep.ejecutar()
+        editar_productos(conn).ejecutar()
     elif event == 'Bajas':
-        fb = Feature_Baja(conn)
-        fb.ejecutar()
+        Feature_Baja(conn).ejecutar()
     elif event == 'Conteo':
-        fc = Feature_conteo(conn, user)
-        fc.ejecutar()
+        Feature_conteo(conn, user).ejecutar()
     elif event == 'Crear usuario':
-        fnewu = crear_usuarios(conn)
-        fnewu.ejecutar()
+        crear_usuarios(conn).ejecutar()
     elif event == 'Editar Usuario':
-        feditu = editar_usuarios(conn)
-        feditu.ejecutar()
+        editar_usuarios(conn).ejecutar()
     elif event == 'Editar Producto':
-        feditp = editar_productos(conn)
-        feditp.ejecutar()
+        editar_productos(conn).ejecutar()
     elif event == 'Salir':
         break
     if event == sg.WIN_CLOSED:
