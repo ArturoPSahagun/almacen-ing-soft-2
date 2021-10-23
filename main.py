@@ -24,6 +24,20 @@ def updateFields(cur, window):
     colores.insert(0, '')
     window['-COLORINPUT-'].update(values=(colores))
 
+def lookForNotifications(cur):
+    cur.execute('select sku, nombre, marca, size, color from producto where existencias < minexistencia and disponible = \'t\'')
+    content = cur.fetchall()
+    string = 'Los siguientes productos casi se agotan:\n\n'
+    if content == 0:
+        return
+    for product in content:
+        for campo in product:
+            string += str(campo)
+            string += ' '
+        string += '\n'
+    sg.Popup('OJO', string)
+
+
 #Conexion a la database
 conn = db.connect(
     database = 'd4i0d59nudi76s',
@@ -119,17 +133,20 @@ if rol != 'admin':
         window['-BOTONERA-'].update(visible=False)
 
 updateFields(cur, window)
+lookForNotifications(cur)
 
 #bucle principal
 while True:
     event, values = window.read()
     if event == 'Entradas':
         Feature_entrada(conn, user).ejecutar()
+        lookForNotifications(cur)
     elif event == "Altas":
         Feature_alta(conn, user).ejecutar()
         updateFields(cur, window)
     elif event == "Salidas":
         Feature_salida(conn, user).ejecutar()
+        lookForNotifications(cur)
     elif event == 'Buscar' :
         cur.execute('SELECT sku, nombre, depto, marca, size, color, precio, existencias, ubicacion '
                    'from producto where disponible = True '
