@@ -24,6 +24,23 @@ def updateFields(cur, window):
     colores.insert(0, '')
     window['-COLORINPUT-'].update(values=(colores))
 
+def lookForNotifications(cur):
+    cur.execute('select sku from producto where existencias < minexistencia and existencias > 0 and disponible = \'t\'')
+    pocoContent = cur.fetchall()
+    cur.execute('select sku from producto where existencias < 1 and disponible = \'t\'')
+    ceroContent = cur.fetchall()
+    for product in pocoContent:
+        cur.execute('insert into notificacion(sku, fecha, tipo)'
+                    'select %s, LOCALTIMESTAMP, %s'
+                        'where not exists ('
+                            'select 1 from notificacion where sku = %s and tipo = %s)', (product[0], 'poco', product[0], 'poco'))
+    for product in ceroContent:
+        cur.execute('insert into notificacion(sku, fecha, tipo)'
+                    'select %s, LOCALTIMESTAMP, %s'
+                        'where not exists ('
+                            'select 1 from notificacion where sku = %s and tipo = %s)', (product[0], 'cero', product[0], 'cero'))
+
+
 #Conexion a la database
 conn = db.connect(
     database = 'd4i0d59nudi76s',
@@ -45,11 +62,10 @@ treedata = sg.TreeData()
 layout_login = [[sg.Text("Introduzca su usuario y contraseña")],
                 [sg.Text("Usuario:\t\t"), sg.Input(size=(20, 1), enable_events=True, key='-NAMEINPUT-')],
                 [sg.Text("Contraseña:\t"), sg.Input(size=(20, 1), enable_events=True, key='-PASSWORDINPUT-', password_char='•')],
-                [sg.Button('Login')],
+                [sg.Button('Login', bind_return_key=True)],
                 [sg.Text("", key='-ERRORTEXT-')]
                 ]
-window = sg.Window('Sistema de Almacen', layout_login)
-
+window = sg.Window('Sistema de Almacen', layout_login, location=(0,0))
 while True:
     event, values = window.read()
     if event == "Login" :
@@ -109,27 +125,29 @@ menu_layout = [
               ]
 
 layout_main =   [[sg.Menu(menu_layout, key = '-MENU-')],
-                 [sg.Text("Bienvenido, " + nombre)],
+                 [sg.Text("Bienvenido, " + nombre + '\t\t\t\t\t\t\t\t'), sg.Button('Notificaciones')],
                  [sg.Frame('Consultas', consult_layout), sg.Column(button_layout, key = '-BOTONERA-')]
                 ]
-window = sg.Window("Sistema de almacen", layout_main, finalize=True)
+window = sg.Window("Sistema de almacen", layout_main, finalize=True, location=(0,0))
 if rol != 'admin':
     window['-MENU-'].update(visible=False)
     if rol != 'operador':
         window['-BOTONERA-'].update(visible=False)
 
 updateFields(cur, window)
-
+lookForNotifications(cur)
 #bucle principal
 while True:
     event, values = window.read()
     if event == 'Entradas':
         Feature_entrada(conn, user).ejecutar()
+        lookForNotifications(cur)
     elif event == "Altas":
         Feature_alta(conn, user).ejecutar()
         updateFields(cur, window)
     elif event == "Salidas":
         Feature_salida(conn, user).ejecutar()
+        lookForNotifications(cur)
     elif event == 'Buscar' :
         cur.execute('SELECT sku, nombre, depto, marca, size, color, precio, existencias, ubicacion '
                    'from producto where disponible = True '
