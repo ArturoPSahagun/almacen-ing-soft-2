@@ -275,3 +275,73 @@ class Feature_conteo:
         cur.execute('alter table producto drop column disp;')
         cur.close()
         window.close()
+
+class Feature_bandeja:
+    layout = [[]]
+    def __init__(self, conn):
+        self.conn = conn
+        self.data = sg.TreeData()
+        self.layout = [[sg.Text('Una vez resuelto el problema, seleccione la alerta correspondiente y haga clic en \"Descartar\"')],
+            [sg.Tree(data = sg.TreeData(),
+                     text_color='black',
+                     headings=['Fecha/Hora'],
+                     justification='center',
+                     num_rows=10,
+                     key='-NOTIFTREE-',
+                     enable_events=True,
+                     col0_width=60,
+                     )],
+            [sg.Button('Descartar')]]
+
+    def ejecutar(self):
+        cur = self.conn.cursor()
+        window = sg.Window("Notificaciones", self.layout, finalize=True, location=(1600,0))
+        self.getNotificaiones()
+        window['-NOTIFTREE-'].update(self.data)
+        self.data = sg.TreeData()
+        while True:
+            event, values = window.read()
+            if event =='Descartar':
+                cur.execute('delete from notificacion where sku = %s', window['-NOTIFTREE-'].SelectedRows)
+                self.getNotificaiones()
+                window['-NOTIFTREE-'].update(self.data)
+                self.data = sg.TreeData()
+            if event == sg.WIN_CLOSED:
+                break
+        cur.close()
+        window.close()
+
+    def getNotificaiones(self):
+        cur = self.conn.cursor()
+        cur.execute('select notificacion.sku, nombre, marca, size, color, fecha, tipo '
+                    'from notificacion '
+                    'inner join producto on notificacion.sku = producto.sku')
+        contenido = cur.fetchall()
+        for producto in contenido:
+            if producto[6] == 'poco':
+                self.data.insert('', producto[0],
+                            '¡ඞAGUASඞ! El producto \"' + producto[0] + ' ' + producto[1] + ' ' + producto[2] + ' ' +
+                            producto[3] + ' ' + producto[4] + '\" casi se agota (⚆ᗝ⚆)', values=[producto[5]])
+            else:
+                self.data.insert('', producto[0],
+                            '¡👁J👁! El producto \"' + producto[0] + ' ' + producto[1] + ' ' + producto[2] + ' ' +
+                            producto[3] + ' ' + producto[4] + '\" ya se acabo ʕ ͡° ʖ̯ ͡°ʔ', values=[producto[5]])
+        cur.close()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
