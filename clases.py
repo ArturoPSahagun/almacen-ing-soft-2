@@ -2,6 +2,7 @@ import PySimpleGUI as sg
 import psycopg2 as db
 from datetime import datetime
 from tkcalendar import *
+from tkinter import *
 import sys
 
 class Feature_salida:
@@ -21,6 +22,7 @@ class Feature_salida:
                  [sg.Text("Fecha: "), sg.Text(self.fecha, text_color='black', background_color='lightgray'), sg.Text("\t\tFolio: ",), sg.Text(self.folio, text_color='black', background_color='lightgray')],
                  [sg.Text('')],
                  [sg.Frame('Codigo',[[sg.Input(size=(10, 1), key='-CODIGOINPUT-')]]), sg.Frame('Cantidad', [[sg.Input(size=(10, 1), key='-CANTIDADINPUT-')]]), sg.Button("Registrar")],
+                 [sg.Button('Salida a futuro')],
                  #[sg.Text("Codigo:"), sg.Input(size=(10, 1), enable_events=True, key='-CODIGOINPUT-'),
                  # sg.Text("Cantidad: "), sg.Input(size=(10, 1), enable_events=True, key='-CANTIDADINPUT-'), sg.Button('Registrar')],
                  [sg.Tree(data=sg.TreeData(),
@@ -46,6 +48,31 @@ class Feature_salida:
         window = sg.Window("Salidas", self.layout)
         while True:
             event, values = window.read()
+
+            if event=='Salida a futuro': #Funcion para mostrar calendario
+                root = Tk() 
+                root.geometry("400x400")  
+                cal = Calendar(root, selectmode="day",firstweekday="monday",
+                            day=int(datetime.now().strftime("%d")),
+                            month=int(datetime.now().strftime("%m")), 
+                            year=int(datetime.now().strftime("%Y")),
+                            disabledforeground="green",
+                            bordercolor="green",
+                            background="green",
+                            normalbackground="lightgreen",
+                            weekendbackground="darkgreen",
+                            weekendforeground ="black" ,
+                            disabledbackground="green") 
+                cal.pack(padx=10,pady = 20) 
+                def grad_date(): 
+                    date.config(text = "Selected Date is: " + cal.get_date()) 
+                Button(root, text = "Get Date", 
+                    command = grad_date).pack(pady = 20) 
+                date = Label(root, text = "") 
+                date.pack(pady = 20) 
+                #Termina funcion del calendario
+
+
             if event == 'Registrar':
                 cur.execute('select nombre from producto where sku=\''+values['-CODIGOINPUT-']+'\' AND disponible = True')
                 nombre = cur.fetchall()
@@ -85,6 +112,7 @@ class Feature_entrada:
                  [sg.Text("Fecha: "), sg.Text(self.fecha, text_color='black', background_color='lightgray'), sg.Text("\t\tFolio: ",), sg.Text(self.folio, text_color='black', background_color='lightgray')],
                  [sg.Text('')],
                  [sg.Frame('Codigo',[[sg.Input(size=(10, 1), key='-CODIGOINPUT-')]]), sg.Frame('Cantidad', [[sg.Input(size=(10, 1), key='-CANTIDADINPUT-')]]), sg.Button("Registrar")],
+                 [sg.Button('Entrada a futuro')],
                  #[sg.Text("Codigo:"), sg.Input(size=(10, 1), enable_events=True, key='-CODIGOINPUT-'),
                  # sg.Text("Cantidad: "), sg.Input(size=(10, 1), enable_events=True, key='-CANTIDADINPUT-'), sg.Button('Registrar')],
                  [sg.Tree(data = sg.TreeData(),
@@ -110,6 +138,32 @@ class Feature_entrada:
         window = sg.Window("Entradas", self.layout)
         while True:
             event, values = window.read()
+
+
+            if event=='Entrada a futuro': #Funcion para mostrar calendario
+                root = Tk() 
+                root.geometry("400x400")  
+                cal = Calendar(root, selectmode="day",firstweekday="monday",
+                            day=int(datetime.now().strftime("%d")),
+                            month=int(datetime.now().strftime("%m")), 
+                            year=int(datetime.now().strftime("%Y")),
+                            disabledforeground="green",
+                            bordercolor="green",
+                            background="green",
+                            normalbackground="lightgreen",
+                            weekendbackground="darkgreen",
+                            weekendforeground ="black" ,
+                            disabledbackground="green") 
+                cal.pack(padx=10,pady = 20) 
+                def grad_date(): 
+                    date.config(text = "Selected Date is: " + cal.get_date()) 
+                Button(root, text = "Get Date", 
+                    command = grad_date).pack(pady = 20) 
+                date = Label(root, text = "") 
+                date.pack(pady = 20) 
+                #Termina funcion del calendario
+
+
             if event == 'Registrar':
                 cur.execute('select nombre from producto where sku=\''+values['-CODIGOINPUT-']+'\' AND disponible = True')
                 nombre = cur.fetchall()
