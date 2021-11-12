@@ -253,6 +253,88 @@ class Feature_Baja:
         cur.close()
         window.close()
 
+class Feature_reporte:
+    layout = [[]]
+    fecha = ''
+    fechaINI = ''
+
+    def __init__(self, conn, user):
+        self.conn = conn
+        self.user = user
+        cur = conn.cursor()
+        self.fecha = datetime.today().strftime("%d/%m/%Y")
+
+        self.layout=[
+            [sg.Text("Fecha: "), sg.Text(self.fecha, text_color='black', background_color='lightgray'),],
+            [sg.Text('')],
+            [sg.Text("Generar reportes generales")],
+            [sg.Text('')],
+            [sg.Button('Fecha inicial'), sg.Button('Fecha final')],
+            [sg.Button('Confirmar')]]
+
+    def ejecutar(self):
+        cur=self.conn.cursor()
+        items = [()]
+        items.pop(0)
+        window=sg.Window("Reporte",self.layout)
+        while True:
+            event,values=window.read()      
+            
+            
+            if event == 'Fecha inicial':  #Funcion para mostrar calendario
+                root = Tk() 
+                root.geometry("400x400")  
+                cal = Calendar(root, selectmode="day",firstweekday="monday",
+                            day=int(datetime.now().strftime("%d")),
+                            month=int(datetime.now().strftime("%m")), 
+                            year=int(datetime.now().strftime("%Y")),
+                            disabledforeground="green",
+                            bordercolor="green",
+                            background="green",
+                            normalbackground="lightgreen",
+                            weekendbackground="darkgreen",
+                            weekendforeground ="black" ,
+                            disabledbackground="green") 
+                cal.pack(padx=10,pady = 20) 
+                def grad_date(): 
+                    date.config(text = "Fecha seleccionada: " + cal.get_date()) 
+                Button(root, text = "Seleccionar fecha", 
+                    command = grad_date).pack(pady = 20) 
+                date = Label(root, text = "") 
+                date.pack(pady = 20) 
+                #Termina funcion del calendario
+            
+            
+            if event == 'Fecha final': #Funcion para mostrar calendario
+                root = Tk() 
+                root.geometry("400x400")  
+                cal = Calendar(root, selectmode="day",firstweekday="monday",
+                            day=int(datetime.now().strftime("%d")),
+                            month=int(datetime.now().strftime("%m")), 
+                            year=int(datetime.now().strftime("%Y")),
+                            disabledforeground="green",
+                            bordercolor="green",
+                            background="green",
+                            normalbackground="lightgreen",
+                            weekendbackground="darkgreen",
+                            weekendforeground ="black" ,
+                            disabledbackground="green") 
+                cal.pack(padx=10,pady = 20) 
+                def grad_date(): 
+                    date.config(text = "Fecha seleccionada " + cal.get_date())
+                Button(root, text = "Seleccionar fecha", 
+                    command = grad_date).pack(pady = 20) 
+                date = Label(root, text = "") 
+                date.pack(pady = 20) 
+                #Termina funcion del calendario
+
+
+            if event == sg.WIN_CLOSED:
+                break
+        cur.close()
+        window.close()
+
+
 class Feature_conteo:
     layout = [[]]
     def __init__(self, conn, user):

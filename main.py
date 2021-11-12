@@ -113,6 +113,7 @@ button_layout = [[sg.Button('Entradas', size=(10, 3))],
                  [sg.Button('Altas', size=(10, 3))],
                  [sg.Button('Bajas', size=(10, 3))],
                  [sg.Button('Conteo', size=(10, 3))],
+                 [sg.Button('Reporte', size=(10,3))],
                  [sg.Button('Salir', size=(10, 3))]]
 
 menu_layout = [
@@ -174,6 +175,8 @@ while True:
         Feature_Baja(conn).ejecutar()
     elif event == 'Conteo':
         Feature_conteo(conn, user).ejecutar()
+    elif event == 'Reporte':
+        Feature_reporte(conn,user).ejecutar()
     elif event == 'Crear usuario':
         crear_usuarios(conn).ejecutar()
     elif event == 'Editar Usuario':
