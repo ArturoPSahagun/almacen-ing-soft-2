@@ -86,7 +86,7 @@ layout_login = [[sg.Text("Introduzca su usuario y contraseña")],
                 [sg.Button('Login', bind_return_key=True)],
                 [sg.Text("", key='-ERRORTEXT-')]
                 ]
-window = sg.Window('Sistema de Almacen', layout_login, location=(1600,0))
+window = sg.Window('Sistema de Almacen', layout_login)
 while True:
     event, values = window.read()
     if event == "Login" :
@@ -151,7 +151,7 @@ layout_main =   [[sg.Menu(menu_layout, key = '-MENU-')],
                  [sg.Text("Bienvenido, " + nombre + '\t\t\t\t\t\t\t\t'), sg.Button('Notificaciones')],
                  [sg.Frame('Consultas', consult_layout), sg.Column(button_layout, key = '-BOTONERA-')]
                 ]
-window = sg.Window("Sistema de almacen", layout_main, finalize=True, location=(1600,0))
+window = sg.Window("Sistema de almacen", layout_main, finalize=True)
 if rol != 'admin':
     window['-MENU-'].update(visible=False)
     if rol != 'operador':

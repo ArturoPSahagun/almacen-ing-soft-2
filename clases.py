@@ -368,7 +368,7 @@ class Feature_reporte:
                 entradas = cur.fetchall()
                 cur.execute('select * from salida where fecha > %s and fecha < %s', (values['-INICIAL-'], values['-FINAL-']))
                 salidas = cur.fetchall()
-                filename = datetime.now().strftime("%d-%b-%Y-%H:%M:%S") + ".txt"
+                filename = datetime.now().strftime("%d-%b-%Y-%H-%M-%S") + ".txt"
                 with open(filename, "x") as reportefile:
                     reportefile.write('REPORTE DEL SISTEMA DE ALMACEN DE UNA TIENDA DEPARTAMENTAL\n\n\n')
                     reportefile.write("------------ESTADO ACTUAL DE LA BASE DE DATOS--------------\n\n")
@@ -467,7 +467,7 @@ class Feature_conteo:
                 resultados = cur.fetchall()
                 diftotal = 0.0
                 dif = 0.0
-                with open('Conteo-' + datetime.today().strftime("%d-%b-%Y-%H:%M:%S") + ".txt", "x") as reportefile:
+                with open('Conteo-' + datetime.today().strftime("%d-%b-%Y-%H-%M-%S") + ".txt", "x") as reportefile:
                     reportefile.write('---RESULTADOS DEL CONTEO DE EXISTENCIAS CON FECHA: ' + datetime.today().strftime("%d/%m/%Y") + '---\n\n')
                     reportefile.write('SKU\tDescripcion\t\tDiferencias\tTotal $\n')
                     for row in resultados:
@@ -513,7 +513,7 @@ class Feature_conteo_idividual:
 
                 cur.execute('select sku, nombre, marca, size, color, precio, existencias from producto where sku = %s', (values['-CODIGOINPUT-'],))
                 row = cur.fetchone()
-                with open('ConteoIndividual-' + datetime.today().strftime("%d-%b-%Y-%H:%M:%S") + ".txt", "x") as reportefile:
+                with open('ConteoIndividual-' + datetime.today().strftime("%d-%b-%Y-%H-%M-%S") + ".txt", "x") as reportefile:
                     reportefile.write('---RESULTADOS DEL CONTEO DE EXISTENCIAS CON FECHA: ' + datetime.today().strftime("%d/%m/%Y") + '---\n\n')
                     reportefile.write('SKU\tDescripcion\t\t\tDiferencias\n')
                     descripcion = row[1] + row[2] + row[3] + row[4]
@@ -549,7 +549,7 @@ class Feature_bandeja:
 
     def ejecutar(self):
         cur = self.conn.cursor()
-        window = sg.Window("Notificaciones", self.layout, finalize=True, location=(1600,0))
+        window = sg.Window("Notificaciones", self.layout, finalize=True)
         self.getNotificaiones()
         window['-NOTIFTREE-'].update(self.data)
         self.data = sg.TreeData()
