@@ -3,6 +3,7 @@ import psycopg2 as db
 from datetime import datetime
 from tkcalendar import *
 from tkinter import *
+import smtplib, ssl
 import sys
 
 class Feature_salida:
@@ -293,6 +294,7 @@ class Feature_reporte:
             [sg.Text('')],
             [sg.Button('Fecha inicial'), sg.Input(size=(10, 1), key='-INICIAL-', disabled=True, text_color='black' )],
             [sg.Button('Fecha final'), sg.Input(size=(10, 1), key='-FINAL-',  disabled=True, text_color='black' )],
+            [sg.Text('Email: '), sg.Input(size=(20, 1), key='-EMAILINPUT-')],
             [sg.Button('Confirmar')]]
 
     def ejecutar(self):
@@ -357,57 +359,56 @@ class Feature_reporte:
                 date = Label(root, text = "") 
                 date.pack(pady = 20) 
                 #Termina funcion del calendario
-
-            if event == 'Confirmar':
-                break
             if event == sg.WIN_CLOSED:
                 break
+            if event == 'Confirmar':
+                cur.execute("select * from producto")
+                estado_actual = cur.fetchall()
+                cur.execute('select * from entrada where fecha > %s and fecha < %s', (values['-INICIAL-'], values['-FINAL-']))
+                entradas = cur.fetchall()
+                cur.execute('select * from salida where fecha > %s and fecha < %s', (values['-INICIAL-'], values['-FINAL-']))
+                salidas = cur.fetchall()
+                filename = datetime.now().strftime("%d-%b-%Y-%H:%M:%S") + ".txt"
+                with open(filename, "x") as reportefile:
+                    reportefile.write('REPORTE DEL SISTEMA DE ALMACEN DE UNA TIENDA DEPARTAMENTAL\n\n\n')
+                    reportefile.write("------------ESTADO ACTUAL DE LA BASE DE DATOS--------------\n\n")
+                    for row in estado_actual:
+                        reportefile.write('Codigo: ' + row[0] + '\t\t\tExistencias: ' + str(row[9]) + '\n')
+                        reportefile.write('Descripcion: ' + row[2] + ' ' + row[4] + ' marca ' + row[3] + ' color ' + row[5] + '\n')
+                        reportefile.write('Departamento: ' + row[7] + '\tPrecio: ' + str(row[6]) + '\tUbicación: ' + row[1] + '\n\n')
+                    reportefile.write("\n\n\nMOVIMIENTOS REGISTRADOS DEL DIA " + values['-INICIAL-'] + ' AL DIA ' + values['-FINAL-'])
+                    reportefile.write("\n\n------------------------ENTRADAS--------------------------\n")
+                    for row in entradas:
+                        reportefile.write('Fecha: ' + str(row[2]) + '\t\tResponsable: ' + row[1] + '\n')
+                        reportefile.write('Observacion: ' + row[3] +  '\nProductos:\n')
+                        cur.execute('select mercanciaenentrada.sku, nombre, cantidad from mercanciaenentrada inner join producto on mercanciaenentrada.sku = producto.sku where identrada = %s', (row[0],))
+                        productos = cur.fetchall()
+                        for p in productos:
+                            reportefile.write('SKU: ' + str(p[0]) + ' Nombre: ' + p[1] + '\tCantidad: ' + str(p[2]) + '\n')
+                        reportefile.write('\n\n\n')
+                    reportefile.write("\n\n------------------------SALIDAS--------------------------\n")
+                    for row in salidas:
+                        reportefile.write('Fecha: ' + str(row[2]) + '\t\tResponsable: ' + row[1] + '\n')
+                        reportefile.write('Motivo: ' + row[3] +  '\nProductos:\n')
+                        cur.execute('select mercanciaensalida.sku, nombre, cantidad from mercanciaensalida inner join producto on mercanciaensalida.sku = producto.sku where idsalida = %s', (row[0],))
+                        productos = cur.fetchall()
+                        for p in productos:
+                            reportefile.write('SKU: ' + str(p[0]) + ' Nombre: ' + p[1] + '\tCantidad: ' + str(p[2]) + '\n')
+                        reportefile.write('\n\n\n')
 
-        cur.execute("select * from producto")
-        estado_actual = cur.fetchall()
-        cur.execute('select * from entrada where fecha > %s and fecha < %s', (values['-INICIAL-'], values['-FINAL-']))
-        entradas = cur.fetchall()
-        cur.execute('select * from salida where fecha > %s and fecha < %s', (values['-INICIAL-'], values['-FINAL-']))
-        salidas = cur.fetchall()
-
-        with open(datetime.now().strftime("%d-%b-%Y-%H:%M:%S") + ".txt", "x") as reportefile:
-            reportefile.write('REPORTE DEL SISTEMA DE ALMACEN DE UNA TIENDA DEPARTAMENTAL\n\n\n')
-            reportefile.write("------------ESTADO ACTUAL DE LA BASE DE DATOS--------------\n\n")
-            for row in estado_actual:
-                reportefile.write('Codigo: ' + row[0] + '\t\t\tExistencias: ' + str(row[9]) + '\n')
-                reportefile.write('Descripcion: ' + row[2] + ' ' + row[4] + ' marca ' + row[3] + ' color ' + row[5] + '\n')
-                reportefile.write('Departamento: ' + row[7] + '\tPrecio: ' + str(row[6]) + '\tUbicación: ' + row[1] + '\n\n')
-            reportefile.write("\n\n\nMOVIMIENTOS REGISTRADOS DEL DIA " + values['-INICIAL-'] + ' AL DIA ' + values['-FINAL-'])
-            reportefile.write("\n\n------------------------ENTRADAS--------------------------\n")
-            for row in entradas:
-                reportefile.write('Fecha: ' + str(row[2]) + '\t\tResponsable: ' + row[1] + '\n')
-                reportefile.write('Observacion: ' + row[3] +  '\nProductos:\n')
-                cur.execute('select mercanciaenentrada.sku, nombre, cantidad from mercanciaenentrada inner join producto on mercanciaenentrada.sku = producto.sku where identrada = %s', (row[0],))
-                productos = cur.fetchall()
-                for p in productos:
-                    reportefile.write('SKU: ' + str(p[0]) + ' Nombre: ' + p[1] + '\tCantidad: ' + str(p[2]) + '\n')
-                reportefile.write('\n\n\n')
-            reportefile.write("\n\n------------------------SALIDAS--------------------------\n")
-            for row in salidas:
-                reportefile.write('Fecha: ' + str(row[2]) + '\t\tResponsable: ' + row[1] + '\n')
-                reportefile.write('Motivo: ' + row[3] +  '\nProductos:\n')
-                cur.execute('select mercanciaensalida.sku, nombre, cantidad from mercanciaensalida inner join producto on mercanciaensalida.sku = producto.sku where idsalida = %s', (row[0],))
-                productos = cur.fetchall()
-                for p in productos:
-                    reportefile.write('SKU: ' + str(p[0]) + ' Nombre: ' + p[1] + '\tCantidad: ' + str(p[2]) + '\n')
-                reportefile.write('\n\n\n')
-
-
-
-
-
-
-
-
-
-
-
-
+                if values['-EMAILINPUT-'] != '':
+                    port = 465
+                    smtp_server = "smtp.gmail.com"
+                    sender_email = "almacenpy.ingsoft2@gmail.com"  # Enter your address
+                    receiver_email = values['-EMAILINPUT-']  # Enter receiver address
+                    password = 'muladhara'
+                    with open(filename, "r") as myfile:
+                        message = myfile.read().encode('utf-8')
+                    context = ssl.create_default_context()
+                    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+                        server.login(sender_email, password)
+                        server.sendmail(sender_email, receiver_email, message)
+                break
         cur.close()
         window.close()
 
