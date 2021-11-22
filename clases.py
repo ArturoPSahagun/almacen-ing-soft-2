@@ -490,6 +490,46 @@ class Feature_conteo:
         cur.close()
         window.close()
 
+
+class Feature_conteo_idividual:
+    layout = [[]]
+    def __init__(self, conn, user):
+        self.conn = conn
+        self.user = user
+        cur = conn.cursor
+        self.layout= [
+                 [sg.Frame('Codigo',[[sg.Input(size=(10, 1), key='-CODIGOINPUT-')]]), sg.Frame('Cantidad', [[sg.Input(size=(10, 1), key='-CANTIDADINPUT-')]])],
+                 [sg.Button('Terminar')]]
+
+    def ejecutar(self):
+        cur = self.conn.cursor()
+        nombre = ''
+        items = [()]
+        items.pop(0)
+        window = sg.Window("Conteo Individual", self.layout)
+        while True:
+            event, values = window.read()
+            if event == 'Terminar':
+
+                cur.execute('select sku, nombre, marca, size, color, precio, existencias from producto where sku = %s', (values['-CODIGOINPUT-'],))
+                row = cur.fetchone()
+                with open('ConteoIndividual-' + datetime.today().strftime("%d-%b-%Y-%H:%M:%S") + ".txt", "x") as reportefile:
+                    reportefile.write('---RESULTADOS DEL CONTEO DE EXISTENCIAS CON FECHA: ' + datetime.today().strftime("%d/%m/%Y") + '---\n\n')
+                    reportefile.write('SKU\tDescripcion\t\t\tDiferencias\n')
+                    descripcion = row[1] + row[2] + row[3] + row[4]
+                    dif = int(values['-CANTIDADINPUT-']) - int(row[6])
+                    diftotal = float(row[5]) * float(dif)
+                    reportefile.write(row[0] + '\t' + descripcion + '\t' + str(dif) + '\t\t' + '\n')
+                    reportefile.write('\n\nDiferencia total en $: ' + str(diftotal))
+                cur.execute('update producto set existencias = %s where sku = %s', (values['-CANTIDADINPUT-'], values['-CODIGOINPUT-']))
+                break
+            if event == sg.WIN_CLOSED:
+                break
+        cur.close()
+        window.close()
+
+
+
 class Feature_bandeja:
     layout = [[]]
     def __init__(self, conn):

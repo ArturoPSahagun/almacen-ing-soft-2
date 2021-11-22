@@ -124,7 +124,7 @@ consult_layout = [[sg.Text("Codigo:"), sg.Input(size=(5, 1), enable_events=True,
                            headings=['   Nombre   ', 'Dpto', 'Marca', 'Tamaño', 'Color', 'Precio', 'Exis.','Ubicacion'],
                            auto_size_columns=True,
                            justification='center',
-                           num_rows=15,
+                           num_rows=20,
                            col0_width=6,
                            key='-LISTA-',
                            enable_events=True)]]
@@ -134,6 +134,7 @@ button_layout = [[sg.Button('Entradas', size=(10, 3))],
                  [sg.Button('Altas', size=(10, 3))],
                  [sg.Button('Bajas', size=(10, 3))],
                  [sg.Button('Conteo', size=(10, 3))],
+                 [sg.Button('Conteo Indivual', size=(10, 3))],
                  [sg.Button('Reporte', size=(10,3))],
                  [sg.Button('Salir', size=(10, 3))]]
 
@@ -207,6 +208,8 @@ while True:
         editar_productos(conn).ejecutar()
     elif event == "Notificaciones":
         Feature_bandeja(conn).ejecutar()
+    elif event == "Conteo Indivual":
+        Feature_conteo_idividual(conn, user).ejecutar()
     elif event == 'Salir':
         break
     if event == sg.WIN_CLOSED:
