@@ -112,8 +112,8 @@ class editar_productos:
                     window['-COLORINPUT-'].update(prod[0][5])
                     window['-PRECIOINPUT-'].update(prod[0][6])
                     window['-UBICACIONINPUT-'].update(prod[0][1])
-                    window['-DISPONIBLEINPUT-'].update(prod[0][9])
-                    window['-MINEXISTENCIAINPUT-'].update(prod[0][10])
+                    window['-DISPONIBLEINPUT-'].update(prod[0][10])
+                    window['-MINEXISTENCIAINPUT-'].update(prod[0][8])
 
             elif event == 'Actualizar':
                 cur.execute('UPDATE producto '

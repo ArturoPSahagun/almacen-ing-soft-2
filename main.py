@@ -40,6 +40,27 @@ def lookForNotifications(cur):
                         'where not exists ('
                             'select 1 from notificacion where sku = %s and tipo = %s)', (product[0], 'cero', product[0], 'cero'))
 
+def lookForFutureES(cur):
+    cur.execute('select identrada from entrada where futuro <= now() at time zone \'America/Chicago\'')
+    entradas = cur.fetchall()
+    for e in entradas:
+        cur.execute('select sku, cantidad from mercanciaenentrada where identrada = %s', (e[0],))
+        productos = cur.fetchall()
+        for p in productos:
+            cur.execute('update producto set existencias = existencias + %s where sku = %s', (p[1], p[0]))
+        cur.execute('update entrada set fecha = futuro where identrada = %s', (e[0],))
+        cur.execute('update entrada set futuro = null where identrada = %s', (e[0],))
+
+    cur.execute('select idsalida from salida where futuro <= now() at time zone \'America/Chicago\'')
+    salidas = cur.fetchall()
+    for s in salidas:
+        cur.execute('select sku, cantidad from mercanciaensalida where idsalida = %s', (s[0],))
+        productos = cur.fetchall()
+        for p in productos:
+            cur.execute('update producto set existencias = existencias - %s where sku = %s', (p[1], p[0]))
+        cur.execute('update salida set fecha = futuro where idsalida = %s', (s[0],))
+        cur.execute('update salida set futuro = null where idsalida = %s', (s[0],))
+
 
 #Conexion a la database
 conn = db.connect(
@@ -77,7 +98,7 @@ while True:
 
         if passw != values['-PASSWORDINPUT-']:
             sg.Popup('Error', 'Usuario o contraseña incorrectos')
-            window.FindElement('-PASSWORDINPUT-').Update('')
+            window['-PASSWORDINPUT-'].Update('')
             continue
         else:
             user = values['-NAMEINPUT-']
@@ -137,6 +158,7 @@ if rol != 'admin':
 
 updateFields(cur, window)
 lookForNotifications(cur)
+lookForFutureES(cur)
 #bucle principal
 while True:
     event, values = window.read()

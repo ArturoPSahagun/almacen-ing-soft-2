@@ -22,7 +22,7 @@ class Feature_salida:
                  [sg.Text("Fecha: "), sg.Text(self.fecha, text_color='black', background_color='lightgray'), sg.Text("\t\tFolio: ",), sg.Text(self.folio, text_color='black', background_color='lightgray')],
                  [sg.Text('')],
                  [sg.Frame('Codigo',[[sg.Input(size=(10, 1), key='-CODIGOINPUT-')]]), sg.Frame('Cantidad', [[sg.Input(size=(10, 1), key='-CANTIDADINPUT-')]]), sg.Button("Registrar")],
-                 [sg.Button('Salida a futuro')],
+                 [sg.Button('Salida a futuro'), sg.Input(size=(10, 1), key='-FUTUROINPUT-', disabled=True, text_color='black' )],
                  #[sg.Text("Codigo:"), sg.Input(size=(10, 1), enable_events=True, key='-CODIGOINPUT-'),
                  # sg.Text("Cantidad: "), sg.Input(size=(10, 1), enable_events=True, key='-CANTIDADINPUT-'), sg.Button('Registrar')],
                  [sg.Tree(data=sg.TreeData(),
@@ -62,14 +62,21 @@ class Feature_salida:
                             normalbackground="lightgreen",
                             weekendbackground="darkgreen",
                             weekendforeground ="black" ,
-                            disabledbackground="green") 
+                            disabledbackground="green",
+                            date_pattern = "y-mm-dd")
                 cal.pack(padx=10,pady = 20) 
                 def grad_date(): 
-                    date.config(text = "Selected Date is: " + cal.get_date()) 
-                Button(root, text = "Get Date", 
-                    command = grad_date).pack(pady = 20) 
+                    date.config(text = "La fecha seleccionada es: " + cal.get_date())
+                    window['-FUTUROINPUT-'].Update(cal.get_date())
+                def borrar_date():
+                    window['-FUTUROINPUT-'].Update('')
+                Button(root, text = "Fijar Fecha",
+                    command = grad_date).pack(pady = 20)
+                Button(root, text="Borrar Fecha",
+                       command=borrar_date).pack(pady=20)
                 date = Label(root, text = "") 
-                date.pack(pady = 20) 
+                date.pack(pady = 20)
+
                 #Termina funcion del calendario
 
 
@@ -85,11 +92,16 @@ class Feature_salida:
                     window['-CODIGOINPUT-'].update('')
                     window['-CANTIDADINPUT-'].update('')
             if event == 'Terminar':
-                cur.execute('insert into salida(iduser, motivo) values(%s, %s) returning idsalida', (self.user, values['-MOTIVOINPUT-']))
+                if values['-FUTUROINPUT-'] == '':
+                    cur.execute('insert into salida(iduser, motivo) values(%s, %s) returning idsalida', (self.user, values['-MOTIVOINPUT-']))
+                else:
+                    cur.execute('insert into salida(iduser, motivo, futuro) values(%s, %s, %s) returning idsalida', (self.user, values['-MOTIVOINPUT-'], values['-FUTUROINPUT-']))
+
                 idSalida = cur.fetchall()[0][0]
                 for prod in items:
                     cur.execute('insert into mercanciaEnSalida (sku, idsalida, cantidad) values(%s, %s, %s)', (prod[0], idSalida, prod[1]))
-                    cur.execute('update producto set existencias = existencias - %s where sku = %s', (prod[1], prod[0]))
+                    if values['-FUTUROINPUT-'] == '':
+                        cur.execute('update producto set existencias = existencias - %s where sku = %s', (prod[1], prod[0]))
                 break
             if event == sg.WIN_CLOSED:
                break
@@ -112,7 +124,7 @@ class Feature_entrada:
                  [sg.Text("Fecha: "), sg.Text(self.fecha, text_color='black', background_color='lightgray'), sg.Text("\t\tFolio: ",), sg.Text(self.folio, text_color='black', background_color='lightgray')],
                  [sg.Text('')],
                  [sg.Frame('Codigo',[[sg.Input(size=(10, 1), key='-CODIGOINPUT-')]]), sg.Frame('Cantidad', [[sg.Input(size=(10, 1), key='-CANTIDADINPUT-')]]), sg.Button("Registrar")],
-                 [sg.Button('Entrada a futuro')],
+                 [sg.Button('Entrada a futuro'), sg.Input(size=(10, 1), key='-FUTUROINPUT-',  disabled=True, text_color='black' )],
                  #[sg.Text("Codigo:"), sg.Input(size=(10, 1), enable_events=True, key='-CODIGOINPUT-'),
                  # sg.Text("Cantidad: "), sg.Input(size=(10, 1), enable_events=True, key='-CANTIDADINPUT-'), sg.Button('Registrar')],
                  [sg.Tree(data = sg.TreeData(),
@@ -153,12 +165,18 @@ class Feature_entrada:
                             normalbackground="lightgreen",
                             weekendbackground="darkgreen",
                             weekendforeground ="black" ,
-                            disabledbackground="green") 
+                            disabledbackground="green",
+                            date_pattern = "y-mm-dd")
                 cal.pack(padx=10,pady = 20) 
                 def grad_date(): 
-                    date.config(text = "Selected Date is: " + cal.get_date()) 
-                Button(root, text = "Get Date", 
-                    command = grad_date).pack(pady = 20) 
+                    date.config(text = "Selected Date is: " + cal.get_date())
+                    window['-FUTUROINPUT-'].Update(cal.get_date())
+                def borrar_date():
+                    window['-FUTUROINPUT-'].Update('')
+                Button(root, text="Fijar Fecha",
+                       command=grad_date).pack(pady=20)
+                Button(root, text="Borrar Fecha",
+                       command=borrar_date).pack(pady=20)
                 date = Label(root, text = "") 
                 date.pack(pady = 20) 
                 #Termina funcion del calendario
@@ -176,11 +194,15 @@ class Feature_entrada:
                     window['-CODIGOINPUT-'].update('')
                     window['-CANTIDADINPUT-'].update('')
             if event == 'Terminar':
-                cur.execute('insert into entrada(iduser, observacion) values(%s, %s) returning identrada', (self.user, values['-MOTIVOINPUT-']))
+                if values['-FUTUROINPUT-'] == '':
+                    cur.execute('insert into entrada(iduser, observacion) values(%s, %s) returning identrada',(self.user, values['-MOTIVOINPUT-']))
+                else:
+                    cur.execute('insert into entrada(iduser, observacion, futuro) values(%s, %s, %s) returning identrada', (self.user, values['-MOTIVOINPUT-'], values['-FUTUROINPUT-']))
                 idEntrada = cur.fetchall()[0][0]
                 for prod in items:
                     cur.execute('insert into mercanciaEnEntrada (sku, identrada, cantidad) values(%s, %s, %s)', (prod[0], idEntrada, prod[1]))
-                    cur.execute('update producto set existencias = existencias + %s where sku = %s', (prod[1], prod[0]))
+                    if values['-FUTUROINPUT-'] == '':
+                        cur.execute('update producto set existencias = existencias + %s where sku = %s', (prod[1], prod[0]))
                 break
             if event == sg.WIN_CLOSED:
                break
@@ -265,11 +287,12 @@ class Feature_reporte:
         self.fecha = datetime.today().strftime("%d/%m/%Y")
 
         self.layout=[
-            [sg.Text("Fecha: "), sg.Text(self.fecha, text_color='black', background_color='lightgray'),],
+            [sg.Text("Fecha de hoy: "), sg.Text(self.fecha, text_color='black', background_color='lightgray'),],
             [sg.Text('')],
             [sg.Text("Generar reportes generales")],
             [sg.Text('')],
-            [sg.Button('Fecha inicial'), sg.Button('Fecha final')],
+            [sg.Button('Fecha inicial'), sg.Input(size=(10, 1), key='-INICIAL-', disabled=True, text_color='black' )],
+            [sg.Button('Fecha final'), sg.Input(size=(10, 1), key='-FINAL-',  disabled=True, text_color='black' )],
             [sg.Button('Confirmar')]]
 
     def ejecutar(self):
@@ -294,12 +317,16 @@ class Feature_reporte:
                             normalbackground="lightgreen",
                             weekendbackground="darkgreen",
                             weekendforeground ="black" ,
-                            disabledbackground="green") 
+                            disabledbackground="green",
+                            date_pattern = "y-mm-dd")
                 cal.pack(padx=10,pady = 20) 
-                def grad_date(): 
-                    date.config(text = "Fecha seleccionada: " + cal.get_date()) 
-                Button(root, text = "Seleccionar fecha", 
-                    command = grad_date).pack(pady = 20) 
+
+                def grad_date():
+                    date.config(text = "Fecha seleccionada: " + cal.get_date())
+                    window['-INICIAL-'].Update(cal.get_date())
+                Button(root, text="Fijar Fecha",
+                       command=grad_date).pack(pady=20)
+
                 date = Label(root, text = "") 
                 date.pack(pady = 20) 
                 #Termina funcion del calendario
@@ -318,19 +345,69 @@ class Feature_reporte:
                             normalbackground="lightgreen",
                             weekendbackground="darkgreen",
                             weekendforeground ="black" ,
-                            disabledbackground="green") 
-                cal.pack(padx=10,pady = 20) 
-                def grad_date(): 
-                    date.config(text = "Fecha seleccionada " + cal.get_date())
-                Button(root, text = "Seleccionar fecha", 
-                    command = grad_date).pack(pady = 20) 
+                            disabledbackground="green",
+                            date_pattern = "y-mm-dd")
+                cal.pack(padx=10,pady = 20)
+
+                def grad_date():
+                    date.config(text="Fecha seleccionada: " + cal.get_date())
+                    window['-FINAL-'].Update(cal.get_date())
+                Button(root, text="Fijar Fecha",
+                       command=grad_date).pack(pady=20)
                 date = Label(root, text = "") 
                 date.pack(pady = 20) 
                 #Termina funcion del calendario
 
-
+            if event == 'Confirmar':
+                break
             if event == sg.WIN_CLOSED:
                 break
+
+        cur.execute("select * from producto")
+        estado_actual = cur.fetchall()
+        cur.execute('select * from entrada where fecha > %s and fecha < %s', (values['-INICIAL-'], values['-FINAL-']))
+        entradas = cur.fetchall()
+        cur.execute('select * from salida where fecha > %s and fecha < %s', (values['-INICIAL-'], values['-FINAL-']))
+        salidas = cur.fetchall()
+
+        with open(datetime.now().strftime("%d-%b-%Y-%H:%M:%S") + ".txt", "x") as reportefile:
+            reportefile.write('REPORTE DEL SISTEMA DE ALMACEN DE UNA TIENDA DEPARTAMENTAL\n\n\n')
+            reportefile.write("------------ESTADO ACTUAL DE LA BASE DE DATOS--------------\n\n")
+            for row in estado_actual:
+                reportefile.write('Codigo: ' + row[0] + '\t\t\tExistencias: ' + str(row[9]) + '\n')
+                reportefile.write('Descripcion: ' + row[2] + ' ' + row[4] + ' marca ' + row[3] + ' color ' + row[5] + '\n')
+                reportefile.write('Departamento: ' + row[7] + '\tPrecio: ' + str(row[6]) + '\tUbicación: ' + row[1] + '\n\n')
+            reportefile.write("\n\n\nMOVIMIENTOS REGISTRADOS DEL DIA " + values['-INICIAL-'] + ' AL DIA ' + values['-FINAL-'])
+            reportefile.write("\n\n------------------------ENTRADAS--------------------------\n")
+            for row in entradas:
+                reportefile.write('Fecha: ' + str(row[2]) + '\t\tResponsable: ' + row[1] + '\n')
+                reportefile.write('Observacion: ' + row[3] +  '\nProductos:\n')
+                cur.execute('select mercanciaenentrada.sku, nombre, cantidad from mercanciaenentrada inner join producto on mercanciaenentrada.sku = producto.sku where identrada = %s', (row[0],))
+                productos = cur.fetchall()
+                for p in productos:
+                    reportefile.write('SKU: ' + str(p[0]) + ' Nombre: ' + p[1] + '\tCantidad: ' + str(p[2]) + '\n')
+                reportefile.write('\n\n\n')
+            reportefile.write("\n\n------------------------SALIDAS--------------------------\n")
+            for row in salidas:
+                reportefile.write('Fecha: ' + str(row[2]) + '\t\tResponsable: ' + row[1] + '\n')
+                reportefile.write('Motivo: ' + row[3] +  '\nProductos:\n')
+                cur.execute('select mercanciaensalida.sku, nombre, cantidad from mercanciaensalida inner join producto on mercanciaensalida.sku = producto.sku where idsalida = %s', (row[0],))
+                productos = cur.fetchall()
+                for p in productos:
+                    reportefile.write('SKU: ' + str(p[0]) + ' Nombre: ' + p[1] + '\tCantidad: ' + str(p[2]) + '\n')
+                reportefile.write('\n\n\n')
+
+
+
+
+
+
+
+
+
+
+
+
         cur.close()
         window.close()
 
